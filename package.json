@@ -10,7 +10,7 @@
   "devDependencies": {
     "eslint": "*",
     "eslint-config-google": "*",
-    "nodemon": "^1.18.10"
+    "sinon": "*"
   },
   "dependencies": {
     "aws-sdk": "*",
