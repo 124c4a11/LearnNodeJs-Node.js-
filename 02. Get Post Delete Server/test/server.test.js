@@ -78,4 +78,66 @@ describe('server tests', () => {
       });
     });
   });
+
+  describe('POST', () => {
+    it('should file not modified and return status 409', (done) => {
+      fse.copyFileSync(
+        path.join(config.get('fixturesRoot'), 'index.js'),
+        path.join(config.get('filesRoot'), 'index.js')
+      );
+
+      const mtime = fse.statSync(path.join(config.get('filesRoot'), 'index.js')).mtime;
+
+      const req = request.post('http://localhost:3000/index.js', (err, res, body) => {
+        if (err) return done();
+
+        const newMtime = fse.statSync(path.join(config.get('filesRoot'), 'index.js')).mtime;
+
+        assert.deepStrictEqual(mtime, newMtime);
+        assert.strictEqual(res.statusCode, 409);
+        assert.strictEqual(body, 'File Exists!');
+
+        done();
+      });
+
+      fse.createReadStream(path.join(config.get('fixturesRoot'), 'index.js')).pipe(req);
+    });
+
+    it('status 409 when zero file size', (done) => {
+      fse.copyFileSync(
+        path.join(config.get('fixturesRoot'), 'index.js'),
+        path.join(config.get('filesRoot'), 'index.js')
+      );
+
+      const mtime = fse.statSync(path.join(config.get('filesRoot'), 'index.js')).mtime;
+
+      const req = request.post('http://localhost:3000/index.js', (err, res, body) => {
+        if (err) return done(err);
+
+        const newMtime = fse.statSync(path.join(config.get('filesRoot'), 'index.js')).mtime;
+
+        assert.deepStrictEqual(mtime, newMtime);
+        assert.strictEqual(res.statusCode, 409);
+        assert.strictEqual(body, 'File Exists!');
+
+        done();
+      });
+
+      req.end();
+    });
+
+    it('should created file', (done) => {
+      const req = request.post('http://localhost:3000/spall.png', (err, res, body) => {
+        if (err) return done(err);
+
+        assert.strictEqual(res.statusCode, 201);
+        assert.strictEqual(body, 'File Created!');
+        assert.ok(fse.existsSync(path.join(config.get('filesRoot'), 'spall.png')));
+
+        done();
+      });
+
+      fse.createReadStream(path.join(config.get('fixturesRoot'), 'small.png')).pipe(req);
+    });
+  });
 });
