@@ -140,4 +140,37 @@ describe('server tests', () => {
       fse.createReadStream(path.join(config.get('fixturesRoot'), 'small.png')).pipe(req);
     });
   });
+
+  describe('DELETE', () => {
+    it('should remove file', (done) => {
+      fse.copyFileSync(
+        path.join(config.get('fixturesRoot'), 'small.png'),
+        path.join(config.get('filesRoot'), 'small.png')
+      );
+
+      request.delete('http://localhost:3000/small.png', (err, res, body) => {
+        if (err) return done(err);
+
+        assert.strictEqual(res.statusCode, 200);
+        assert.strictEqual(body, 'File Deleted!');
+        assert.strictEqual(
+          fse.existsSync(path.join(config.get('filesRoot'), 'small.png')),
+          false
+        );
+
+        done();
+      });
+    });
+
+    it('should return 404', (done) => {
+      request.delete('http://localhost:3000/small.png', (err, res, body) => {
+        if (err) return done(err);
+
+        assert.strictEqual(res.statusCode, 404);
+        assert.strictEqual(body, 'Not Found!');
+
+        done();
+      });
+    });
+  })
 });
