@@ -1,0 +1,12 @@
+extends layout
+
+block content
+
+  h1 Welcome, #{user.displayName}.
+  h2 Your email: #{user.email}.
+
+  p.greeting You are logged in.
+
+  form(action="/logout" method="post")
+    input(type='hidden', name='_csrf', value=csrf)
+    button.btn.btn-primary(type="submit") Logout
